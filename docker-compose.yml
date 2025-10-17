@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  # Frontend service (Svelte app)
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3200:80"
+    depends_on:
+      - backend
+    networks:
+      - homepage-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend-data:/data
+    environment:
+      - GIN_MODE=release
+      - DB_PATH=/data/dashboard.db
+      - PORT=8080
+    networks:
+      - homepage-network
+    restart: unless-stopped
+
+volumes:
+  backend-data:
+
+networks:
+  homepage-network:
+    driver: bridge

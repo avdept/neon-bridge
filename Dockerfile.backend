@@ -1,0 +1,31 @@
+# Backend Dockerfile for Go server
+FROM golang:1.24-alpine AS build
+
+WORKDIR /app
+
+RUN apk add --no-cache git gcc musl-dev
+
+COPY server/go.mod server/go.sum ./
+
+RUN go mod download
+
+COPY server/ ./
+
+RUN CGO_ENABLED=1 GOOS=linux go build -a -installsuffix cgo -o neon-bridge .
+
+FROM alpine:latest
+
+RUN apk --no-cache add ca-certificates sqlite
+
+WORKDIR /root/
+
+COPY --from=build /app/neon-bridge .
+
+RUN mkdir -p /data
+
+EXPOSE 8080
+
+ENV GIN_MODE=release
+ENV DB_PATH=/data/dashboard.db
+
+CMD ["./neon-bridge"]
