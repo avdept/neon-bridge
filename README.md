@@ -23,7 +23,24 @@ A modern homelab dashboard built to monitor your selfhosted(and not just) servic
 - Transmission
 - and much more to come
 
+## Installation
 
+The easiest way to get started is with Docker Compose:
+
+```bash
+git clone https://github.com/avdept/neon-bridge
+cd neon-bridge
+docker compose up -d
+```
+
+Then visit **http://localhost:3200** to access your dashboard!
+
+That's it! The Docker setup will automatically:
+
+- Build and start the Go backend server
+- Build and serve the frontend application
+- Set up the database
+- Handle all the networking
 
 ## 🛠️ Development
 
