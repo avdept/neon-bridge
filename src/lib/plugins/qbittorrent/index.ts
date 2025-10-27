@@ -1,16 +1,16 @@
 import type { Plugin, PluginConfig, PluginData } from '../types.js';
-import TransmissionWidget from './TransmissionWidget.svelte';
+import QBittorrentWidget from './QBittorrentWidget.svelte';
 import { handleApiCall } from '../../utils/errors.js';
 
 export const plugin: Plugin = {
   metadata: {
-    id: 'transmission',
-    name: 'Transmission',
-    description: 'Monitor Transmission BitTorrent client status and torrents',
+    id: 'qbittorrent',
+    name: 'qBittorrent',
+    description: 'Monitor qBittorrent client status and torrents',
     version: '1.0.0',
     author: 'Alex <https://x.com/_avdept>',
     category: 'media',
-    icon: 'transmission'
+    icon: 'qbittorrent'
   },
 
   configTemplate: {
@@ -20,7 +20,7 @@ export const plugin: Plugin = {
         label: 'Card Title',
         type: 'text',
         required: false,
-        default: 'Transmission',
+        default: 'qBittorrent',
         description: 'The title displayed on the card',
         placeholder: 'Enter card title'
       },
@@ -29,16 +29,16 @@ export const plugin: Plugin = {
         label: 'Server URL',
         type: 'url',
         required: true,
-        description: 'URL of your Transmission server (including port)',
-        placeholder: 'http://192.168.1.100:9091'
+        description: 'URL of your qBittorrent WebUI (including port)',
+        placeholder: 'http://192.168.1.100:8080'
       },
       {
         key: 'username',
         label: 'Username',
         type: 'text',
         required: false,
-        description: 'Username for Transmission authentication',
-        placeholder: 'transmission'
+        description: 'Username for qBittorrent authentication',
+        placeholder: 'admin'
       },
       {
         key: 'password',
@@ -46,16 +46,7 @@ export const plugin: Plugin = {
         type: 'password',
         required: false,
         credential: true,
-        description: 'Password for Transmission authentication'
-      },
-      {
-        key: 'rpcPath',
-        label: 'RPC Path',
-        type: 'text',
-        required: false,
-        default: '/transmission/rpc',
-        description: 'RPC endpoint path',
-        placeholder: '/transmission/rpc'
+        description: 'Password for qBittorrent authentication'
       },
       {
         key: 'maxDownloadSpeed',
@@ -84,12 +75,12 @@ export const plugin: Plugin = {
     ]
   },
 
-  component: TransmissionWidget,
+  component: QBittorrentWidget,
 
   async fetchData(config: PluginConfig, widgetId?: string | number, test?: boolean): Promise<PluginData> {
     const result = await handleApiCall(async () => {
       if (widgetId === undefined || test) {
-        const apiUrl = `http://localhost:8080/api/v1/transmission/test`;
+        const apiUrl = `http://localhost:8080/api/v1/qbittorrent/test`;
         return fetch(apiUrl, {
           method: 'POST',
           headers: {
@@ -98,7 +89,7 @@ export const plugin: Plugin = {
           body: JSON.stringify(config)
         });
       } else {
-        const apiUrl = `http://localhost:8080/api/v1/transmission/${widgetId}`;
+        const apiUrl = `http://localhost:8080/api/v1/qbittorrent/${widgetId}`;
         return fetch(apiUrl, {
           method: 'GET',
           headers: {
@@ -106,7 +97,7 @@ export const plugin: Plugin = {
           }
         });
       }
-    }, 'Transmission');
+    }, 'qBittorrent');
 
     if (!result.success) {
       throw new Error(result.error || 'Unknown error occurred');
@@ -117,6 +108,5 @@ export const plugin: Plugin = {
       data: result.data,
       error: null
     };
-
   }
 };

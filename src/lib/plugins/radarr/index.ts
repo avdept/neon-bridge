@@ -75,37 +75,33 @@ export const plugin: Plugin = {
   component: RadarrWidget,
 
   async fetchData(config: PluginConfig, widgetId?: string | number, test?: boolean): Promise<PluginData> {
-    try {
-      const data = await handleApiCall(async () => {
-        if (widgetId === undefined || test) {
-          const apiUrl = `http://localhost:8080/api/v1/radarr/test`;
-          return fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(config)
-          });
-        } else {
-          const apiUrl = `http://localhost:8080/api/v1/radarr/${widgetId}`;
-          return fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-        }
-      }, 'Radarr');
+    const data = await handleApiCall(async () => {
+      if (widgetId === undefined || test) {
+        const apiUrl = `http://localhost:8080/api/v1/radarr/test`;
+        return fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config)
+        });
+      } else {
+        const apiUrl = `http://localhost:8080/api/v1/radarr/${widgetId}`;
+        return fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      }
+    }, 'Radarr');
 
-      return {
-        success: true,
-        data: data,
-        lastUpdated: new Date().toISOString()
-      };
+    return {
+      success: true,
+      data: data,
+      lastUpdated: new Date().toISOString()
+    };
 
-    } catch (error) {
-      console.error('Radarr plugin error:', error);
-      throw error;
-    }
+
   }
 };
