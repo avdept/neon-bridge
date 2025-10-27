@@ -74,37 +74,34 @@ export const plugin: Plugin = {
   component: SonarrWidget,
 
   async fetchData(config: PluginConfig, widgetId?: string | number, test?: boolean): Promise<PluginData> {
-    try {
-      const data = await handleApiCall(async () => {
-        if (widgetId === undefined || test) {
-          const apiUrl = `http://localhost:8080/api/v1/sonarr/test`;
-          return fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(config)
-          });
-        } else {
-          const apiUrl = `http://localhost:8080/api/v1/sonarr/${widgetId}`;
-          return fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-        }
-      }, 'Sonarr');
 
-      return {
-        success: true,
-        data: data,
-        lastUpdated: new Date().toISOString()
-      };
+    const data = await handleApiCall(async () => {
+      if (widgetId === undefined || test) {
+        const apiUrl = `http://localhost:8080/api/v1/sonarr/test`;
+        return fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config)
+        });
+      } else {
+        const apiUrl = `http://localhost:8080/api/v1/sonarr/${widgetId}`;
+        return fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      }
+    }, 'Sonarr');
 
-    } catch (error) {
-      console.error('Sonarr plugin error:', error);
-      throw error;
-    }
+    return {
+      success: true,
+      data: data,
+      lastUpdated: new Date().toISOString()
+    };
+
+
   }
 };

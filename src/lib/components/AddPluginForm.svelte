@@ -38,10 +38,13 @@
     }
   }
 
-
-
-  async function handleConfigSubmit(pluginId: string, config: Record<string, any>) {
+  async function handleConfigSubmit(
+    pluginId: string,
+    config: Record<string, any>
+  ) {
     errorMessage = null;
+    isTestingConfig = true;
+
     try {
       const plugin = pluginRegistry.get(pluginId);
       if (plugin && plugin.fetchData) {
@@ -95,13 +98,12 @@
       }
     } catch (error) {
       console.error("Plugin configuration test failed:", error);
+      isTestingConfig = false;
 
-      // todo: refactor this to use props passing instead of events
       errorMessage =
         error instanceof Error ? error.message : "Configuration test failed";
     }
   }
-
 
   async function handleRemove() {
     if (
@@ -111,21 +113,21 @@
     ) {
       if (!editMode) return;
 
-    try {
-      const success = await dashboardStore.removeWidget(
-        editingWidget!.id
-      );
+      try {
+        const success = await dashboardStore.removeWidget(editingWidget!.id);
 
-      if (success) {
-        closeModal();
-      } else {
-        throw new Error("Failed to remove widget from database");
+        if (success) {
+          closeModal();
+        } else {
+          throw new Error("Failed to remove widget from database");
+        }
+      } catch (error) {
+        console.error("Failed to remove widget:", error);
+        // todo: add some sort of notification to show results
+        alert(
+          error instanceof Error ? error.message : "Failed to remove widget"
+        );
       }
-    } catch (error) {
-      console.error("Failed to remove widget:", error);
-      // todo: add some sort of notification to show results
-      alert(error instanceof Error ? error.message : "Failed to remove widget");
-    }
     }
   }
 </script>
@@ -173,7 +175,7 @@
         {selectedPluginId}
         {initialConfig}
         onSubmit={handleConfigSubmit}
-        errorMessage={errorMessage}
+        {errorMessage}
       />
     {/if}
   </div>
@@ -306,17 +308,6 @@
   .step-content {
     min-height: 300px;
     margin-bottom: 2rem;
-  }
-
-  .step-2-placeholder {
-    text-align: center;
-    padding: 2rem;
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  .step-2-placeholder h3 {
-    color: white;
-    margin-bottom: 1rem;
   }
 
   .step-actions {

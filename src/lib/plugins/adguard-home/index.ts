@@ -72,44 +72,38 @@ export const plugin: Plugin = {
       throw new Error('Server URL, username, and password are required');
     }
 
-    try {
-      const data = await handleApiCall(async () => {
-        if (widgetId === undefined || test) {
-          const apiUrl = `http://localhost:8080/api/v1/adguard/test`;
-          return fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(config)
-          });
-        } else {
-          const apiUrl = `http://localhost:8080/api/v1/adguard/${widgetId}`;
-          return fetch(apiUrl, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            }
-          });
-        }
-      }, 'AdGuard Home');
+    const data = await handleApiCall(async () => {
+      if (widgetId === undefined || test) {
+        const apiUrl = `http://localhost:8080/api/v1/adguard/test`;
+        return fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(config)
+        });
+      } else {
+        const apiUrl = `http://localhost:8080/api/v1/adguard/${widgetId}`;
+        return fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      }
+    }, 'AdGuard Home');
 
-      const stats = {
-        totalQueries: data.num_dns_queries || 0,
-        blockedQueries: data.num_blocked_filtering || 0,
-        avgProcessingTime: data.avg_processing_time || 0,
-        health: data.health
-      };
+    const stats = {
+      totalQueries: data.num_dns_queries || 0,
+      blockedQueries: data.num_blocked_filtering || 0,
+      avgProcessingTime: data.avg_processing_time || 0,
+      health: data.health
+    };
 
-      return {
-        success: true,
-        data: stats,
-        lastUpdated: new Date().toISOString()
-      };
-
-    } catch (error) {
-      console.error('AdGuard Home plugin error:', error);
-      throw error;
-    }
+    return {
+      success: true,
+      data: stats,
+      lastUpdated: new Date().toISOString()
+    };
   }
 };
