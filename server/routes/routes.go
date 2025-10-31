@@ -55,6 +55,9 @@ func SetupRoutes() *gin.Engine {
 		v1.GET("/immich/:widget_id", controllers.ProxyImmichStats)
 		v1.POST("/immich/test", controllers.TestImmichConnection)
 
+		v1.GET("/prowlarr/:widget_id", controllers.ProxyProwlarrStats)
+		v1.POST("/prowlarr/test", controllers.TestProwlarrConnection)
+
 		v1.GET("/system/stats", controllers.GetSystemStats)
 	}
 
