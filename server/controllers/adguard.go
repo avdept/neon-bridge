@@ -137,8 +137,6 @@ func proxyAdGuardRequest(serverURL, username, password string) ([]byte, int, err
 
 	stats := &AdGuardStatsResponse{}
 
-	fmt.Printf("DEBUG AdGuard: Raw response: %s\n", string(statsData))
-
 	if err := json.Unmarshal(statsData, &stats); err != nil {
 		fmt.Printf("DEBUG AdGuard: Unmarshal error: %v\n", err)
 		return nil, http.StatusInternalServerError, fmt.Errorf("failed to parse stats response: %v", err)

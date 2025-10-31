@@ -52,6 +52,9 @@ func SetupRoutes() *gin.Engine {
 		v1.GET("/qbittorrent/:widget_id", controllers.ProxyQBittorrentStats)
 		v1.POST("/qbittorrent/test", controllers.TestQBittorrentConnection)
 
+		v1.GET("/immich/:widget_id", controllers.ProxyImmichStats)
+		v1.POST("/immich/test", controllers.TestImmichConnection)
+
 		v1.GET("/system/stats", controllers.GetSystemStats)
 	}
 
