@@ -21,7 +21,8 @@ A modern homelab dashboard built to monitor your selfhosted(and not just) servic
 - Radarr
 - Lidarr
 - Transmission
-- and much more to come
+- Immich
+- Prowlarr
 
 ## Installation
 
