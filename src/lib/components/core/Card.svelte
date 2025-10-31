@@ -113,22 +113,19 @@
         bind:this={statusElement}
         class="card-status {statusClasses[effectiveStatusType]}"
         class:has-alert={alert.length > 0}
-
         role={alerts.length > 0 ? "tooltip" : undefined}
-
       >
         <span class="status-text">{effectiveStatus}</span>
         {#if alerts.length > 0}
-            <div
-              onmouseenter={(e) => handleMouseEnter(alerts, e.currentTarget)}
-              onmouseleave={handleMouseLeave}
-              role="tooltip"
-              aria-label={`Alert: ${alerts.map(alert => alert.message).join(", ")}`}
+          <div
+            onmouseenter={(e) => handleMouseEnter(alerts, e.currentTarget)}
+            onmouseleave={handleMouseLeave}
+            role="tooltip"
+            aria-label={`Alert: ${alerts.map((alert) => alert.message).join(", ")}`}
+          >
+            <span class="alert-icon">{@html getAlertIcon(alerts[0].level)}</span
             >
-              <span class="alert-icon"
-                >{@html getAlertIcon(alerts[0].level)}</span
-              >
-            </div>
+          </div>
         {/if}
       </div>
     {/if}

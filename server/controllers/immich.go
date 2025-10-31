@@ -57,10 +57,8 @@ type ImmichNotifications struct {
 type ImmichStats struct {
 	ServerStats   ImmichServerStatistics `json:"serverStats"`
 	Storage       ImmichStorage          `json:"storage"`
-	About         ImmichAboutInfo        `json:"about"`
 	Users         int64                  `json:"users"`
-	Notifications ImmichNotifications    `json:"notifications"`
-	VersionCheck  ImmichVersionCheck     `json:"versionCheck"`
+	Alerts       []Alert                `json:"alerts"`
 }
 
 func TestImmichConnection(c *gin.Context) {
@@ -159,23 +157,34 @@ func fetchImmichStats(serverURL, apiKey string) (*ImmichStats, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch about info: %v", err)
 	}
-	stats.About = *about
 
-	notifications, err := fetchImmichNotifications(client, serverURL, apiKey)
+	var alerts = make([]Alert, 0)
+
+	notificationCount, err := fetchImmichNotifications(client, serverURL, apiKey)
+
 	if err != nil {
 		fmt.Printf("Warning: failed to fetch notifications: %v\n", err)
-		stats.Notifications = ImmichNotifications{Total: 0}
-	} else {
-		stats.Notifications = *notifications
+	} else if notificationCount > 0 {
+		alerts = append(alerts, Alert{
+			Message: fmt.Sprintf("You have %d unread notifications", notificationCount),
+			Level:    "warning",
+		})
 	}
 
 	versionCheck, err := fetchImmichVersionCheck(client, serverURL, apiKey)
 	if err != nil {
 		fmt.Printf("Warning: failed to fetch version check: %v\n", err)
-		stats.VersionCheck = ImmichVersionCheck{ReleaseVersion: ""}
 	} else {
-		stats.VersionCheck = *versionCheck
+		if versionCheck.ReleaseVersion != about.Version {
+			message := fmt.Sprintf("A new Immich version %s is available! You are running version %s.", versionCheck.ReleaseVersion, about.Version)
+			alerts = append(alerts, Alert{
+				Message: message,
+				Level:    "warning",
+			})
+		}
 	}
+
+	stats.Alerts = alerts
 
 	return stats, nil
 }
@@ -270,12 +279,12 @@ func fetchImmichAbout(client *http.Client, serverURL, apiKey string) (*ImmichAbo
 	return &about, nil
 }
 
-func fetchImmichNotifications(client *http.Client, serverURL, apiKey string) (*ImmichNotifications, error) {
+func fetchImmichNotifications(client *http.Client, serverURL, apiKey string) (int64, error) {
 	url := fmt.Sprintf("%s/api/notifications", serverURL)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	req.Header.Set("X-API-Key", apiKey)
@@ -283,25 +292,21 @@ func fetchImmichNotifications(client *http.Client, serverURL, apiKey string) (*I
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		return nil, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
+		return 0, fmt.Errorf("HTTP %d: %s", resp.StatusCode, string(body))
 	}
 
 	var notificationsArray []interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&notificationsArray); err != nil {
-		return nil, err
+		return 0, err
 	}
 
-	notifications := &ImmichNotifications{
-		Total: int64(len(notificationsArray)),
-	}
-
-	return notifications, nil
+	return int64(len(notificationsArray)), nil
 }
 
 func fetchImmichVersionCheck(client *http.Client, serverURL, apiKey string) (*ImmichVersionCheck, error) {
