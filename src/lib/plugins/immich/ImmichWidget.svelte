@@ -4,12 +4,7 @@
   import StatsGrid from "../../components/core/StatsGrid.svelte";
   import InlineProgressBar from "../../components/core/InlineProgressBar.svelte";
   import { type Plugin, type PluginAlert } from "../../plugins/types.js";
-  import {
-    formatNumber,
-    formatBytes,
-    calculateStoragePercentage,
-    getStorageColor,
-  } from "../../utils/formatters.js";
+  import { formatNumber, getStorageColor } from "../../utils/formatters.js";
 
   interface Props {
     config: any;
@@ -63,52 +58,6 @@
       total: stats.storage.diskSize,
     };
   });
-
-  const hasVersionUpdate = $derived(() => {
-    const currentVersion = stats.about?.version;
-    const releaseVersion = stats.versionCheck?.releaseVersion;
-    return !!(
-      currentVersion &&
-      releaseVersion &&
-      currentVersion !== releaseVersion
-    );
-  });
-
-  const versionAlert = $derived((): PluginAlert | undefined => {
-    if (hasVersionUpdate()) {
-      return {
-        level: "warning",
-        message: `Immich update available: from ${stats.about?.version || "Unknown"} to ${stats.versionCheck?.releaseVersion || "Unknown"}`,
-        timestamp: new Date(),
-      };
-    }
-    return undefined;
-  });
-
-  const finalAlert = $derived(alert || versionAlert());
-
-  const otherNotificationsCount = $derived((): PluginAlert | undefined => {
-    if (stats?.notifications?.total > 0) {
-      return {
-        level: "warning",
-        message: `You have ${stats.notifications.total} unread notifications.`,
-        timestamp: new Date(),
-      };
-    }
-    return undefined;
-  });
-
-  const alertsList = $derived(() => {
-    const alerts: PluginAlert[] = [];
-    if (finalAlert) {
-      alerts.push(finalAlert);
-    }
-    const otherAlert = otherNotificationsCount();
-    if (otherAlert) {
-      alerts.push(otherAlert);
-    }
-    return alerts;
-  });
 </script>
 
 <Card
@@ -117,7 +66,7 @@
   {status}
   {statusType}
   icon={plugin.metadata.icon}
-  alerts={alertsList()}
+  alerts={stats.alerts as PluginAlert[]}
 >
   <div class="immich-widget">
     {#if isSuccess && stats}
@@ -161,11 +110,7 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-  }
-  .error-message,
-  .loading-message {
     display: flex;
-    align-items: center;
     justify-content: center;
     min-height: 80px;
     color: rgba(255, 255, 255, 0.7);
